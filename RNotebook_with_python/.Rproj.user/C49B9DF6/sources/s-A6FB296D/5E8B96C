@@ -1,0 +1,30 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1561779996539.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "5E8B96C",
+    "lastKnownWriteTime" : 1561780014,
+    "last_content_update" : 1561780014929,
+    "path" : "C:/Users/tanak/Desktop/rnotebook_with_python/rnotebook_with_python.Rmd",
+    "project_path" : "rnotebook_with_python.Rmd",
+    "properties" : {
+        "chunk_output_type" : "inline",
+        "content_preview_enabled" : "true",
+        "content_preview_inline" : "false",
+        "cursorPosition" : "86,3",
+        "last_setup_crc32" : "3776A71Da54decb2",
+        "scrollLine" : "74",
+        "tempName" : "Untitled1"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}

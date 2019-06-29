@@ -1,0 +1,41 @@
+"0","library(knitr)"
+"0","library(Cairo)"
+"0","library(extrafont)"
+"2","Registering fonts with R
+"
+"0","loadfonts(quiet = TRUE)"
+"0",""
+"0","library(reticulate)"
+"0","knitr::knit_engines$set(python = reticulate::eng_python)"
+"0",""
+"0","library(lubridate)"
+"2","
+ Ÿ‚ÌƒpƒbƒP[ƒW‚ğ•t‚¯‰Á‚¦‚Ü‚·: elubridatef 
+
+"
+"2"," ˆÈ‰º‚ÌƒIƒuƒWƒFƒNƒg‚Í epackage:basef ‚©‚çƒ}ƒXƒN‚³‚ê‚Ä‚¢‚Ü‚·: 
+
+     date 
+
+"
+"0","library(scales)"
+"0","library(tidyverse)"
+"2","[30m-- [1mAttaching packages[22m --------------------------------------- tidyverse 1.2.1 --[39m
+"
+"2","[30m[32mã[30m [34mggplot2[30m 3.1.1     [32mã[30m [34mpurrr  [30m 0.3.2
+[32mã[30m [34mtibble [30m 2.1.3     [32mã[30m [34mdplyr  [30m 0.8.1
+[32mã[30m [34mtidyr  [30m 0.8.3     [32mã[30m [34mstringr[30m 1.4.0
+[32mã[30m [34mreadr  [30m 1.3.1     [32mã[30m [34mforcats[30m 0.4.0[39m
+"
+"2","[30m-- [1mConflicts[22m ------------------------------------------ tidyverse_conflicts() --
+[31mx[30m [34mlubridate[30m::[32mas.difftime()[30m masks [34mbase[30m::as.difftime()
+[31mx[30m [34mreadr[30m::[32mcol_factor()[30m      masks [34mscales[30m::col_factor()
+[31mx[30m [34mlubridate[30m::[32mdate()[30m        masks [34mbase[30m::date()
+[31mx[30m [34mpurrr[30m::[32mdiscard()[30m         masks [34mscales[30m::discard()
+[31mx[30m [34mdplyr[30m::[32mfilter()[30m          masks [34mstats[30m::filter()
+[31mx[30m [34mlubridate[30m::[32mintersect()[30m   masks [34mbase[30m::intersect()
+[31mx[30m [34mdplyr[30m::[32mlag()[30m             masks [34mstats[30m::lag()
+[31mx[30m [34mlubridate[30m::[32msetdiff()[30m     masks [34mbase[30m::setdiff()
+[31mx[30m [34mlubridate[30m::[32munion()[30m       masks [34mbase[30m::union()[39m
+"
+"0","options(dplyr.width = Inf)"

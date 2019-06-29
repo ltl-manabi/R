@@ -1,0 +1,8 @@
+"0","import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set(font=['IPAEXGothic'])
+import os
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = 'C:/Anaconda3/Library/plugins/platforms'
+
+df = sns.load_dataset(""iris"")"

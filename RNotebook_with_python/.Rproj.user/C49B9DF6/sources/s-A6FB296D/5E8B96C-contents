@@ -1,0 +1,87 @@
+---
+title: "RNotebookでRとPythonを混在させる"
+author:
+- タナカケンタ
+- (tanaka@mana.bi)
+date: "`r format(Sys.time(),'%Y-%m-%d')`"
+output:
+  pdf_document:
+    highlight: zenburn
+    latex_engine: xelatex
+    number_sections: yes
+    toc: yes
+  html_notebook:
+    toc: yes
+  word_document:
+    toc: yes
+  ioslides_presentation:
+    css: mystyle.css
+    df_print: paged
+    highlight: zenburn
+    toc: yes
+  html_document:
+    code_folding: hide
+    theme: spacelab
+    toc: yes
+documentclass: bxjsarticle
+classoption: xelatex,ja=standard,a4j,11pt
+indent: yes
+header-includes:
+- \usepackage{amsmath,pxfonts}
+- \usepackage{hyperref}
+- \usepackage{graphicx}
+- \usepackage{zxjatype}
+- \setCJKmonofont{IPAexGothic}
+- \setCJKsansfont{IPAexGothic}
+- \setCJKmainfont{IPAexMincho}
+- \hypersetup{bookmarksnumbered=true,colorlinks=true,linkcolor=blue,urlcolor=blue,setpagesize=false}
+- \setlength{\parskip}{2em}
+---
+
+```{r setup, include = FALSE}
+library(knitr)
+library(Cairo)
+library(extrafont)
+loadfonts(quiet = TRUE)
+
+library(reticulate)
+knitr::knit_engines$set(python = reticulate::eng_python)
+
+library(lubridate)
+library(scales)
+library(tidyverse)
+options(dplyr.width = Inf)
+```
+
+# Rのコード
+
+```{r eval = TRUE, message = FALSE, warning = FALSE}
+data(iris)
+head(iris)
+```
+
+```{r eval = TRUE, message = FALSE, warning = FALSE}
+pairs(iris)
+```
+
+# Pythonのコード
+
+```{python eval = TRUE, message = FALSE, warning = FALSE}
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+sns.set(font=['IPAEXGothic'])
+import os
+os.environ['QT_QPA_PLATFORM_PLUGIN_PATH'] = 'C:/Anaconda3/Library/plugins/platforms'
+
+df = sns.load_dataset("iris")
+```
+
+```{python eval = TRUE, message = FALSE, warning = FALSE}
+df.head()
+```
+
+```{python eval = TRUE, message = FALSE, warning = FALSE}
+sns.pairplot(df,hue='species')
+plt.show()
+```
