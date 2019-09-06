@@ -1,3 +1,5 @@
 install.packages("tidyverse")
 install.packages("recipes")
 install.packages("bestNormalize")
+install.packages('IRkernel')
+IRkernel::installspec()
