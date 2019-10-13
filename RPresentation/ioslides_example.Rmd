@@ -1,0 +1,68 @@
+---
+title: "RMarkdownでプレゼンテーション"
+author: "タナカケンタ"
+date: "2019/10/6"
+output:
+  ioslides_presentation:
+    incremental: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# 数式の例
+
+$$
+R^{2} = 1 - \frac{\sum_{i} (y_{i} - \hat{y}_{i})^{2}}{\sum_{i} (y_{i} - \overline{y})^{2}}
+$$
+
+$$
+AIC = n \left( \log \left( 2 \pi \frac{S_{e}}{n} \right) + 1 \right) + 2 (p + 2)
+$$
+
+# 表の例 (1) Markdown
+
+| Tables        | Are           | Cool  |
+| ------------- |:-------------:| -----:|
+| col 3 is      | right-aligned | $1600 |
+| col 2 is      | centered      |   $12 |
+| zebra stripes | are neat      |    $1 |
+
+# 表の例 (2) kable
+
+```{r}
+data <- faithful[1:4, ]
+knitr::kable(data, caption = "Table with kable")
+```
+
+# 表の例 (3) xtable
+
+```{r results="asis"}
+data <- faithful[1:4, ]
+print(xtable::xtable(data, caption = "Table with xtable"), type = "html")
+```
+
+# 表の例 (4) stargazer
+
+```{r results="asis"}
+data <- faithful[1:4, ]
+stargazer::stargazer(data, type = "html", title = "Table with stargazer")
+```
+
+# インタラクティブなグラフィックス (highcharter)
+
+```{r message=FALSE, warning=FALSE}
+library(magrittr)
+library(highcharter)
+highchart() %>% 
+  hc_title(text = "Scatter chart with size and color") %>% 
+  hc_add_series_scatter(mtcars$wt, mtcars$mpg,
+                        mtcars$drat, mtcars$hp)
+```
+
+# インクリメンタルな箇条書き
+
+* 1つ目の項目
+* 2つ目の項目
+* 3つ目の項目
