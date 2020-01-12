@@ -1,0 +1,36 @@
+---
+title: "Rで「Python実践データ分析100本ノック」"
+subtitle: "第章 10本ノック"
+date: "`r format(Sys.time(),'%Y-%m-%d')`"
+author:
+- "タナカケンタ"
+- "(tanaka@mana.bi)"
+output:
+  html_notebook:
+    toc: true
+    theme: spacelab
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(cache = TRUE)
+options(dplyr.width = Inf)
+```
+
+# はじめに
+
+このNotebookは、[Python実践データ分析100本ノック](https://amzn.to/31gVxwz)のコードを、R言語で実装しようというものです。各章のNotebookについては、[筆者のWebサイト](https://mana.bi/wiki.cgi?page=R%A4%C7%A1%D6Python%BC%C2%C1%A9%A5%C7%A1%BC%A5%BF%CA%AC%C0%CF100%CB%DC%A5%CE%A5%C3%A5%AF%A1%D7)からアクセスしてください。
+
+<div align="center">
+<a href="https://www.amazon.co.jp/dp/4798058750/ref=as_li_ss_il?ie=UTF8&linkCode=li3&tag=dsciesotist-22&linkId=a7cfc337c3cb35cc0af817ffd6260423&language=ja_JP" target="_blank"><img border="0" src="//ws-fe.amazon-adsystem.com/widgets/q?_encoding=UTF8&ASIN=4798058750&Format=_SL250_&ID=AsinImage&MarketPlace=JP&ServiceVersion=20070822&WS=1&tag=dsciesotist-22&language=ja_JP" ></a><img src="https://ir-jp.amazon-adsystem.com/e/ir?t=dsciesotist-22&language=ja_JP&l=li3&o=9&a=4798058750" width="1" height="1" border="0" alt="" style="border:none !important; margin:0px !important;" /><br />
+[Python実践データ分析100本ノック](https://amzn.to/31gVxwz)
+</div>
+
+書籍自体は、「実践」と言ってもさほど難易度は高くなく、「Pythonの参考書を１冊読んだり、入門研修を受けてみて、何となくPandas、Matplotlib、Scikit-Learnが使えるようになった」人が、知識を定着させるために、ビジネスにおいてありがちなデータでコーディングを学ぶために、ちょうどよい本だと思います。
+
+このNotebookでは、書籍の内容や[公開されているデータ](https://www.shuwasystem.co.jp/support/7980html/5875.html)をもとに、「ノック」の内容をR言語で実装することを試みます。なお、できるだけモダンなRコードを意図し、[tidyverse](https://www.tidyverse.org/)の各パッケージを使用します。
+
+# ノック: 
+
+```{r eval=TRUE, message=FALSE, warning=FALSE}
+
+```

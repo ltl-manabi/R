@@ -1,14 +1,11 @@
 ---
-title: "R言語入門　第1章　Rの基本"
-subtitle: "1.12　tidyverseの世界"
+title: "learnrパッケージのサンプル"
 date: "`r format(Sys.time(),'%Y-%m-%d')`"
 author:
 - "タナカ ケンタ"
 - "(https://mana.bi/)"
 output:
   learnr::tutorial
-#  html_document
-#  slidy_presentation
 runtime: shiny_prerendered
 editor_options: 
   chunk_output_type: inline
@@ -18,21 +15,87 @@ editor_options:
 library(learnr)
 ```
 
-```{r code00, exercise=FALSE, include=FALSE, message=FALSE, warning=FALSE}
-library(MASS)
-library(tidyverse)
-data(Cars93)
+## About learnr package
+
+[learnr](https://rstudio.github.io/learnr/)パッケージは、R言語の学習コンテンツを作成するためのパッケージです。RStudio社によって開発されています。
+
+## Loading learnr package
+
+learnrパッケージを使用して学習コンテンツを作成するには、**learnrパッケージを読み込んだRMarkdown文書を作成する**必要があります。このファイル自身がそれです。RMarkdown文書の作成法については詳しくは触れませんが、[R Markdown入門](https://kazutan.github.io/kazutanR/Rmd_intro.html)などを参照してください。以下のように、文書中のヘッダー (YAML) において、`output`および`runtime`を適切に指定します。また、`setup`チャンクで、learnrパッケージを読み込みます。
+
+```
+output:
+  learnr::tutorial
+  runtime: shiny_prerendered
 ```
 
-# 1.12　tidyverseの世界
+<pre><code>```{r setup, include=FALSE}
+library(learnr)
+```</code></pre>
 
-近年、Rにおけるデータ処理 (入出力、整形、抽出など) のさまざまな場面で、RStudio社のHadley Wickhamを中心に開発が進められている **tidyverse** パッケージ群が利用されています。
+## Making exercise chunk
 
-----
+learnrパッケージを読み込んだ状態で、RMarkdownのチャンクに`exercise=TRUE`とオプションを指定すると、そのコードは学習者 (コンテンツの実行者) が実行して動作を確認できるexerciseチャンクになります。なお、exerciseチャンクには個別の名前が必要です。
 
-## 1.12.1　tidyverseとは
+<pre><code>```{r code01, exercise=TRUE}
+...
+```</code></pre>
 
-tidyverseは、「モダンな」データ処理の方法を提供するパッケージ群で、Hadley Wickhamによる多くのパッケージの総称です。"tidy data" (整然データ) の考え方に基づき、データをパイプ (`%>%`) でつなぎ、一連の処理を実現します。
+以下に実際のexerciseチャンクの例を示します。この文書を、learnrパッケージをインストールした環境で、RStudioで開くと、上部に "Run Document" というボタンが表示されるので、ボタンを押すとコンパイルされ、別ウィンドウで学習用コンテンツとして開きます。
+
+```{r code01, exercise=TRUE}
+a <- 1
+a
+b <- c(3, 3, 4)
+b
+b[c(1, 3)]
+```
+
+なお、それぞれのチャンクは独立して実行されるため、前のチャンクで読み込んだパッケージや作成したオブジェクトは引き継がれません。複数のチャンクで使用するパッケージなどは、セットアップ用のチャンクを作成し、それを継承すると便利です。継承は、`exercise.setup="チャンク名"` として指定します。
+
+<pre><code>```{r code00, exercise=FALSE, include=FALSE, message=FALSE, warning=FALSE}
+library(...)
+```</code></pre>
+
+<pre><code>```{r code01, exercise=TRUE, exercise.setup="code00"}
+...
+```</code></pre>
+
+また、exerciseチャンクではヒントや解答を学習者に提示することもできます。チャンク名の後ろに `-hint` または `-solution` と続けた別のチャンクを作成し、そこにヒントや解答を記述します。以下に例を示します。
+
+```{r code02, exercise=TRUE}
+# Q: 値 "3, 3, 4" からなるベクトルを作成し、オブジェクトaに格納しなさい
+# コード
+
+# 結果の確認
+a
+```
+
+```{r code02-hint}
+# オブジェクトに値を代入するには <- を使います。
+x <- 1
+
+# ベクトルを作成するには c() を使います。
+y <- c(1, 2, 3)
+```
+
+```{r code02-solution}
+a <- c(3, 3, 4)
+```
+
+また、学習者が入力したコードのチェックを行い、フィードバックする機能もありますが、別途必要となるgradethisパッケージの挙動が安定しない (2019年12月時点) ため、ここでは取り上げません。[learnrパッケージのドキュメント](https://rstudio.github.io/learnr/exercises.html#exercise_checking)を参照してください。
+
+## Making question
+
+チャンク内で `question()` 関数を使用すると、選択式の問題を作成できます。
+
+<pre><code>```{r q01, echo=FALSE}
+question("問題文", answer("選択肢1", message = "解説1"),
+                  answer("選択肢2", correct = TRUE, message = "解説2"),
+                  allow_retry = TRUE)
+```</code></pre>
+
+`question()` 関数内で `answer()` 関数を使い、選択肢を作成します。正解となる選択肢には `correct = TRUE` オプションを指定します。`allow_retry = TRUE` オプションを指定すると、何度も回答できます。以下に例を示します。
 
 ```{r q01, echo=FALSE}
 question("tidyverseパッケージの中心的な開発者は誰でしょう？",
@@ -43,641 +106,33 @@ question("tidyverseパッケージの中心的な開発者は誰でしょう？"
          )
 ```
 
+## Making exercise with other language
 
-----
+[learnrパッケージのissue](https://github.com/rstudio/learnr/pull/310)で議論されていた、R以外の言語 (Python, SQLなど) への対応が実装されたようなので、試してみます。もちろん、他の言語を実行するためにはその言語の実行環境が必要です。ここでは、Pythonの例を作成します。
 
-### tidyverseのインストール、読み込み
-
-tidyverseは標準ライブラリではないので、CRANからインストールします。
-
-```{r code01, eval=FALSE, exercise=FALSE}
-install.packages("tidyverse")
+なお、2020年1月12日現在、この機能はGitHubのmasterブランチにはマージされていないため、以下のように対応するブランチをクローンし、手元でパッケージをコンパイルしてインストールする必要があります。
+```
+$ git clone -b exercise_language https://github.com/rstudio/learnr.git
+$ R CMD build learnr
+$ R
+...
+install.packages("learnr_0.10.0.9000.tar.gz")
 ```
 
-インストールしたライブラリは `library()` 関数で読み込みます。
+下記のPythonコードを実行するチャンクを作成し、exerciseとして機能するか確認します。
 
-```{r code02, exercise=TRUE}
-library(tidyverse)
-```
+<pre><code>```{python python01, exercise=TRUE}
+a = [3, 3, 4]
+a
 
-tidyverseパッケージを読み込むと、tidyverseに含まれる複数のパッケージが読み込まれます。
+import numpy as np
+np.sqrt(a)
+```</code></pre>
 
-----
+```{python python01, exercise=TRUE}
+a = [3, 3, 4]
+a
 
-### tidyverseとパイプ (`%>%`)
-
-tidyverseでは、(ほぼ) すべてのデータ・関数を、パイプ (`%>%`) を通じて受け渡していきます。イメージは以下の通りです。
-
-```{r eval=FALSE, exercise=FALSE}
-オブジェクト名 <- データ %>% 処理1 %>% 処理2 %>% 処理3
-```
-
-このようなコードを実行すると、`データ` に対して `処理1`, `処理2`, `処理3` を順番に適用した結果が `オブジェクト名` に代入されます。本研修においても、以降はtidyverseの「作法」にのっとり、tidyverseのパッケージ群とパイプを多用していきます。
-
-なお、正確にはパイプ演算子は、tidyverseに含まれるmagrittrパッケージが提供しています。
-
-----
-
-## 1.12.2　dplyr
-
-dplyrは、データ加工のための一貫した処理体系を提供するパッケージで、データの選択、抽出、要約などが簡便な記述で実行できます。
-
-----
-
-### データの準備
-
-ここでは、MASSパッケージが提供するデータセットのうち、"Cars93" を使用します。Cars93は、自動車のスペック (仕様) と価格をまとめたデータセットです。はじめに `library()` 関数でパッケージを読み込み、`data()` 関数でデータセットを読み込みます。
-
-```{r code03, exercise=TRUE}
-library(MASS)
-data(Cars93)
-head(Cars93)
-str(Cars93)
-```
-
-以降しばらく、Cars93データセットを使用します。
-
-----
-
-### `mutate()` 関数
-
-`mutate()` 関数は、データフレームに対して何らかの処理を適用し、その結果を新しい列として追加するための関数です。`mutate(新しい列名 = 処理)` と記述します。
-
-ここでは、データ中の `Max.Price` と `Min.Price` の差 (値幅) を、`Diff.Price` として計算し、追加します。`mutate()` 関数の実行結果は、最後列に追加されます。
-
-```{r code04, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-df <- Cars93 %>% mutate(Diff.Price = Max.Price - Min.Price)
-head(df)
-str(df)
-```
-
-処理はカンマで区切って、複数指定することもできます。ここでは、上記の値幅の追加と、`Width` と `Length` の比 (縦横比) を計算し、`WL.Ratio` として追加します。
-
-```{r code05, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-df <- Cars93 %>% mutate(Diff.Price = Max.Price - Min.Price, WL.Ratio = Width / Length)
-head(df)
-str(df)
-```
-
-その他、処理には `mutate(新しい列名 = 関数名(列名))` などとして関数も指定できます。
-
-#### やってみよう！
-
-Cars93データを使い、重量 (`Weight`) を馬力 (`Horsepower`) で割った、「[パワーウェイトレシオ](https://ja.wikipedia.org/wiki/%E3%83%91%E3%83%AF%E3%83%BC%E3%82%A6%E3%82%A7%E3%82%A4%E3%83%88%E3%83%AC%E3%82%B7%E3%82%AA)」を算出し、`PowerWeightRatio` 列として追加してみましょう。
-
-```{r ex01, exercise=TRUE, exercise.setup="code00"}
-
-```
-
-```{r ex01-hint, exercise=FALSE}
-df <- Cars93 %>% mutate(PowerWeightRatio = XXXXXXXXXXXXXX)
-head(df)
-str(df)
-```
-
-```{r ex01-solution, exercise.setup="code00"}
-df <- Cars93 %>% mutate(PowerWeightRatio = Weight / Horsepower)
-head(df)
-str(df)
-```
-
-----
-
-### `select()` 関数
-
-`select()` 関数は、データフレームから指定した列を選択するための関数です。`select(列名1, 列名2,...)` と記述します。
-
-ここでは、まずCars93データから、`Manufacturer`, `Type`, `Price`, `Length`, `Width`, `Weight` の6列を選択します。
-
-```{r code06, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-df <- Cars93 %>% select(Manufacturer, Type, Price, Length, Width, Weight)
-head(df)
-str(df)
-```
-
-列名の前に `-` (マイナス) をつけることで、その列を除外することもできます。ここでは、上記のコードで作成した `df` から、`Length`, `Width` を除外します。
-
-```{r code07, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-df <- Cars93 %>% select(Manufacturer, Type, Price, Length, Width, Weight)
-
-# dfからLength, Widthを除外する
-df2 <- df %>% select(-Length, -Width)
-head(df2)
-str(df2)
-```
-
-また、`select()` 関数の引数に、さまざまな条件を指定し、柔軟な選択が可能です。dplyrパッケージが提供する関数として、特定の文字列から始まる列名を指定する `starts_with()` 関数や、特定の文字列で終わる列名を指定する `ends_with()` 関数などがあります。以下に使用頻度が高い関数を列挙します。
-
-* `starts_with()`: 指定した文字列から始まる列を選択
-* `ends_with()`: 指定した文字列で終わる列を選択
-* `contains()`: 指定した文字列を含む列を選択
-* `matches()`: 正規表現で文字列を指定して列を選択
-* `num_range()`: 列名に連番を含む場合、範囲を指定して列を選択
-
-ここでは、Cars93データのうち、`Manufacturer`, `Type` と "Priceで終わる列" を選択します。
-
-```{r code08, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-df <- Cars93 %>% select(Manufacturer, Type, ends_with("Price"))
-head(df)
-str(df)
-```
-
-#### やってみよう！
-
-Cars93データを使い、"Priceで終わる列" を含まないデータを選択してください。(解法はさまざまにあり得ます)
-
-```{r ex02, exercise=TRUE, exercise.setup="code00"}
-
-```
-
-```{r ex02-hint, exercise=FALSE}
-# "Priceで終わる列" を選択
-df <- Cars93 %>% select(ends_with("Price"))
-head(df)
-str(df)
-```
-
-```{r ex02-solution, exercise.setup="code00"}
-df <- Cars93 %>% select(-ends_with("Price"))
-head(df)
-str(df)
-```
-
-----
-
-### `filter()` 関数
-
-`filter()` 関数は、データフレームから指定した行を抽出するための関数です。`filter(条件)` と記述します。条件は、演算子や関数を用いて柔軟に指定できます。ここでは、いくつかの例を挙げていきます。データは、引き続きCars93を使用します。
-
-はじめに、`Price` が30以上の行だけを抽出します。
-
-```{r code09, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-# 抽出前のデータの行数を確認
-nrow(Cars93)
-
-df <- Cars93 %>% filter(Price >= 30)
-df
-
-# 抽出後のデータの行数を確認
-nrow(df)
-```
-
-次に、`Price` が30以上、かつ `Origin` が "USA" の行だけを抽出します。
-
-```{r code10, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-# 抽出前のデータの行数を確認
-nrow(Cars93)
-
-df <- Cars93 %>% filter(Price >= 30 & Origin == "USA")
-df
-
-# 抽出後のデータの行数を確認
-nrow(df)
-```
-
-次に、`Horsepower` が280以上、または `Weight` が4000以上の行だけを抽出します。また、`select()` 関数と組み合わせて出力を整理します。
-
-```{r code11, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-# 抽出前のデータの行数を確認
-nrow(Cars93)
-
-df <- Cars93 %>% filter(Horsepower >= 280 | Weight >= 4000)
-df <- df %>% select(Manufacturer, Model, Type, Price, Horsepower, Weight)
-df
-
-# 抽出後のデータの行数を確認
-nrow(df)
-```
-
-条件に `between()` 関数を使い、範囲を指定することもできます。ここでは、`Price` が30から35の範囲の行を抽出します。
-
-```{r code12, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-# 抽出前のデータの行数を確認
-nrow(Cars93)
-
-df <- Cars93 %>% filter(between(Price, 30, 35))
-df <- df %>% select(Manufacturer, Model, Type, Price, Horsepower, Weight)
-df
-
-# 抽出後のデータの行数を確認
-nrow(df)
-```
-
-----
-
-### `summarise()` 関数
-
-`summarise()` 関数は、指定した列のデータを集計・要約した値を返す関数です。`summarise(列名1 = 集計処理1, 列名2 = 集計処理2,...)` と記述します。一般に、データをカテゴリ変数でグループ化する `group_by()` 関数と組み合わせることが多いですが、基本統計量などデータの特徴を把握したい場合に使います。ここでは、Cars93データについて、これまで紹介した関数を組み合わせて、いくつかの観点で個別に集計してみます。
-
-まず、データ全体の `Price` の平均と中央値、標準偏差を求めます。なお、平均や中央値など基本統計量を算出する関数については、3章で詳しく取り上げます。
-
-```{r code13, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-Cars93 %>% summarise(Avg.Price = mean(Price), Med.Price = median(Price), Std.Price = sd(Price))
-```
-
-次に、`filter()` 関数と組み合わせて、`Origin` が "USA" の場合と "non-USA" の場合の平均、中央値、標準偏差をそれぞれ求めます。
-
-```{r code14, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-# OriginがUSAの場合の集計
-Cars93 %>% filter(Origin == "USA") %>% summarise(Avg.Price = mean(Price), Med.Price = median(Price), Std.Price = sd(Price))
-
-# Originがnon-USAの場合の集計
-Cars93 %>% filter(Origin == "non-USA") %>% summarise(Avg.Price = mean(Price), Med.Price = median(Price), Std.Price = sd(Price))
-```
-
-なお、上記のコードを、後述する `group_by()` 関数を使って記述すると以下のようになります。
-
-```{r code15, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-# Originでグループ化した集計
-Cars93 %>% group_by(Origin) %>% summarise(Avg.Price = mean(Price), Med.Price = median(Price), Std.Price = sd(Price))
-```
-
-次に、`Horsepower` が280以上のデータの中で、最も `Price` が安いものを集計 (抽出) します。
-
-```{r code16, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-Cars93 %>% filter(Horsepower >= 280) %>% summarise(o280_Min.Price = min(Price))
-```
-
-`summarise()` 関数は集計・要約した結果をデータフレーム (`tbl_df`) で返し、元の行や列は含まないことに注意が必要です。
-
-----
-
-### `arrange()` 関数
-
-`arrange()` 関数は、条件に従ってデータフレームの行を並べ替えます。`arrange(キー1, キー2,...)` と記述します。デフォルトでは、昇順に並べ替えます。キーに `desc()` 関数を使うことで、降順を指定できます。
-
-ここでは、Cars93データについて、いくつかの条件を指定して並べ替えてみます。はじめに、`Price` の昇順で並べ替えます。
-
-```{r code17, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-Cars93 %>% arrange(Price) %>% head(n = 10)
-```
-
-次に、`Horsepower` の降順、`Price` の昇順、`Weight` の昇順で並べ替えます。馬力があって、安くて軽い車が上位に表示されます。
-
-```{r code18, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-Cars93 %>% select(Manufacturer, Model, Type, Horsepower, Price, Weight) %>%
-  arrange(desc(Horsepower), Price, Weight) %>%
-  head(n = 10)
-```
-
-上記のように、パイプの直後で改行してコードを見やすくすることもできます。
-
-----
-
-### `group_by()` 関数
-
-`group_by()` 関数は、データを指定した列のカテゴリ変数の値に応じてグループ化します。`group_by(列名1, 列名2,...)` と記述します。数値型の列を指定することもできますが、連続値をグループ化する意味はありません。グループ化したデータフレームは、`grouped_df` という型になります。
-
-前述のように、`group_by()` 関数によるグループ化は、`summarise()` 関数などと組み合わせて使います。以下に、いくつかの例を示します。
-
-```{r code19, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-# Originでグループ化した集計
-Cars93 %>% group_by(Origin) %>% summarise(Avg.Price = mean(Price), Med.Price = median(Price), Std.Price = sd(Price))
-```
-
-```{r code20, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-# OriginとTypeとDriveTrain (駆動方式) でグループ化した集計
-Cars93 %>% group_by(Origin, Type, DriveTrain) %>% summarise(Avg.Price = mean(Price), Med.Price = median(Price), Std.Price = sd(Price))
-```
-
-上記のコードの実行結果では、一部標準偏差が `NA` (Not Available; 欠損値) になっていますが、これはグループの条件に該当するデータが1件しか存在しないため、標準偏差が計算できなかったことを意味します。
-
-----
-
-## 1.12.3　readr
-
-readrは、構造化データの取り扱いを容易に、高速に行うためのパッケージです。構造化データとは、行・列からなる表構造や、「何桁目までが何の値か」と桁数で構造が決まっている固定長データなどを指します。
-
-----
-
-### 使用するデータ
-
-ここでは、筆者が作成した[「全国市販酒類調査の結果をもとにした疑似日本酒データセット」](https://github.com/ltl-manabi/R/tree/master/pseudo_sake_data)を使用します。データはCSV形式で、以下のURLで公開しています。
-
-* https://github.com/ltl-manabi/R/raw/master/pseudo_sake_data/pseudo_sake_data.csv 
-
-----
-
-### `read_csv()` 関数
-
-`read_csv()` 関数は、readrパッケージの核となる、CSV形式のデータを読み込む関数です。`read_csv(ファイル名, col_names = TRUE / FALSE, col_types = 列ごとの型 / NULL, skip = スキップする行数)` と記述します。ファイル名には、パスまたはURLが指定可能です。では、データを読み込みましょう。
-
-```{r code21, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-df <- read_csv("https://raw.githubusercontent.com/ltl-manabi/R/master/pseudo_sake_data/pseudo_sake_data.csv")
-head(df)
-str(df)
-```
-
-`タイプ` 列をfactor型として扱いたい場合は、以下のように指定します。
-
-```{r code22, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-df <- read_csv("https://raw.githubusercontent.com/ltl-manabi/R/master/pseudo_sake_data/pseudo_sake_data.csv", col_types = cols(タイプ = "f"))
-head(df)
-str(df)
-```
-
-### 参考: 標準の `read.csv()` 関数と `read_csv()` 関数の読み込み速度の比較
-
-注: ネットワーク環境と十分なメモリ (空き容量300MB程度) がない場合は実行しないでください。
-
-Rには標準で、`read.csv()` 関数があります。前述のようにreadrパッケージは標準の関数よりも高速にデータの読み込みができます。これを検証してみます。ここでは、ネットワーク速度の要因を除外するため、いちどローカル (一時ディレクトリ) にファイルをダウンロードし、そのうえで読み込みにかかる時間を計測します。なお、速度差が顕著に出るよう、巨大 (10万行、約100万行) なファイルを使用します。約10万行のデータは、zip形式で圧縮しており、展開後のサイズは54MB前後です。
-
-```{r code23, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-# 10万行データのダウンロード
-file <- "https://raw.githubusercontent.com/ltl-manabi/R/master/pseudo_sake_data/large_pseudo_sake_data.csv"
-download.file(file, "large_pseudo_sake_data.csv")
-
-## read.csv() 関数による読み込みと計測
-res <- system.time(df <- read.csv("./large_pseudo_sake_data.csv"))
-cat("10万行: read.csv() 関数の実行時間\n"); res
-str(df)
-
-## factor型への変換をオフにした場合
-res <- system.time(df <- read.csv("./large_pseudo_sake_data.csv", stringsAsFactors = FALSE))
-cat("10万行: stringsAsFactors = FALSEの場合"); res
-str(df)
-
-## read_csv() 関数による読み込みと計測
-res <- system.time(df <- read_csv("./large_pseudo_sake_data.csv"))
-cat("10万行: read_csv() 関数の実行時間"); res
-str(df)
-
-# 100万行データのダウンロード
-file <- "https://media.githubusercontent.com/media/ltl-manabi/R/master/pseudo_sake_data/very_large_pseudo_sake_data.zip"
-download.file(file, "very_large_pseudo_sake_data.zip")
-
-## zipファイルの展開
-unzip("very_large_pseudo_sake_data.zip")
-
-## read.csv() 関数による読み込みと計測
-res <- system.time(df <- read.csv("./very_large_pseudo_sake_data.csv"))
-cat("100万行: read.csv() 関数の実行時間"); res
-
-## read.csv() 関数による読み込みと計測
-res <- system.time(df <- read.csv("./very_large_pseudo_sake_data.csv", stringsAsFactors = FALSE))
-cat("100万行: stringsAsFactors = FALSEの場合"); res
-
-## read_csv() 関数による読み込みと計測
-res <- system.time(df <- read_csv("./very_large_pseudo_sake_data.csv"))
-cat("100万行: read_csv() 関数の実行時間"); res
-str(df)
-```
-
-この他の関数については、2章「データの入出力」で取り上げます。
-
-----
-
-## 1.12.4　tibble
-
-tibbleは、R標準のデータフレーム (`data.frame`) を再定義した `tbl_df` を提供するパッケージです。tibbleは、より効率的で、安全 (厳密) なデータアクセスを実現します。
-
-`tbl_df` は、既存の `data.frame` を `as_tibble()` 関数で変換するか、`tibble()` 関数で作成します。また、readrなど、tidyverseを構成するパッケージの関数を使用してデータフレームを作成すると、`tbl_df` 形式になります。
-
-```{r code24, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-# Cars93データを使用
-data(Cars93)
-
-# オリジナルの型を確認
-class(Cars93)
-
-# tbl_dfに変換
-df <- as_tibble(Cars93)
-
-# 変換後の型を確認
-class(df)
-
-# データ構造を確認
-head(df)
-str(df)
-```
-
-本研修では (および、最近のモダンなRプログラミングでは)、tidyverseの枠組みの中でデータの読み込み、加工を行いますので、tibbleについては、データフレームを作成する際に裏側で使われるもの、という位置づけで理解しておいてかまいません。
-
-----
-
-## 1.12.5　ggplot2
-
-ggplot2は、高度で見栄えの良いグラフィックスを、統一された書式で記述・作成できるパッケージです。
-
-ggplot2は、"Grammar of graphics" (グラフィックスの文法) というアイディアをベースにしており、グラフィックス (いわゆるグラフ) を以下の要素に分解し、それらを `+` で繋げて表現します。
-
-* データと配置: データとx軸、y軸などとのマッピング
-* レイヤー: 描画方法 (点、線、棒など)、値 (そのままの値、平均、差分など) の指定
-* スケール: 軸の範囲や表現 (対数表示) など
-* テーマ: 全体的なデザインを制御
-* その他: 複数グラフの描画、軸の反転など
-
-また、ggplot2のフレームワークを用いて、さまざまなグラフィックスを作成するためのパッケージが数多く提供されています。
-
-この後、3章「データの観察」でggplot2を用いたグラフ作成の方法について詳しく触れますので、ここではいくつかの例を紹介するに留めます。なお、データはCars93を使います。
-
-```{r code25, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-# データの読み込み
-data(Cars93)
-#str(Cars93)
-
-# LengthとWidthの関係を散布図で表現する
-p <- ggplot(Cars93, aes(x = Length, y = Width)) + geom_point(color = "white") + theme_dark()
-p
-
-# TypeごとのPriceの平均を棒グラフで表現する
-p <- ggplot(Cars93, aes(x = Type, y = Price, fill = Type)) + geom_bar(stat = "summary", fun.y = "mean") + theme_light() + labs(title = "TypeごとのPriceの平均")
-p
-
-# ggplot2ベースのGGallyパッケージを使い、ggpairs() 関数でペアプロットを作成する
-# 数値型のみ、欠損値を除去したデータを使う
-library(GGally)
-p <- ggpairs(na.omit(Cars93) %>% select_if(is.numeric)) + labs(title = "変数間の関係 (数値のみ)")
-p
-```
-
-----
-
-## 1.12.6　tidyr / purrr
-
-tidyr / purrr は、いずれも入門の範囲を少し超えますが、データ分析を効率的に行うためのパッケージです。
-
-----
-
-### tidyrパッケージ
-
-tidyrパッケージは、レコードが1行ずつ独立し、属性が列方向に並ぶ「横持ち」のデータを、1行にIDと1つの属性のみを格納し、IDで紐づける「縦持ち」の形式に変換する機能を提供します。tidyverseでは、縦持ちデータを "tidy data" (整然データ) と呼び、データ分析に適した形式として推奨しています。
-
-<div style="text-align:center">
-<img src="https://id.fnshr.info/wp-content/uploads/sites/2/2017/01/messy-data-ex1-var.png" width="80%" /><br/>
-横持ちデータの例<br/>
-出典: "[整然データとは何か｜Colorless Green Ideas](https://id.fnshr.info/2017/01/09/tidy-data-intro/)"
-</div>
-
-<div style="text-align:center">
-<img src="https://id.fnshr.info/wp-content/uploads/sites/2/2017/01/tidy-data-ex1-var.png" width="60%" /><br/>
-縦持ちデータの例<br/>
-出典: "[整然データとは何か｜Colorless Green Ideas](https://id.fnshr.info/2017/01/09/tidy-data-intro/)"
-</div>
-
-`gather()` 関数は、横持ちのデータフレームを縦持ちに変換します。また、`spread()` 関数は、縦持ちのデータフレームを横持ちに変換します。
-
-```{r code26, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-# データの読み込み
-data(Cars93)
-
-# 横持ちを縦持ちに変換
-# Type, Price, Width, Length列のみ抽出し、
-# 行番号をidとして付与している
-df <- Cars93 %>% select(Type, Price, Width, Length) %>% rownames_to_column("id") %>% gather(key, value, -id)
-head(df)
-str(df)
-
-# 縦持ちを横持ちに変換
-# 標準ではkey列の値 (character型) の文字コード順に
-# 列に展開されるため、並びを指定したい場合は、
-# あらかじめfactor型に変換し、順序を指定しておく
-df <- df %>% spread(key, value)
-head(df)
-str(df)
-```
-
-----
-
-### purrrパッケージ
-
-purrr (プァー、パァーのような発音) は、「関数型プログラミング」の考え方に基づいた、繰り返し処理や、データの各要素 (列など) に同じ処理を適用する際のコーディングを、効率的に見通しよく記述する手段を提供するパッケージです。従来、`for` 文や `while` 文で記述したり、`*apply()` 系関数 (本研修では取り上げません) で実行していた繰り返し処理を、`map_*()` 系の関数でよりシンプルに記述できます。
-
-purrrの `map()` 関数は、指定したリストやベクトル (データフレームの列) の各要素について、同じ処理を繰り返し適用します。ここでは、シンプルな例としてCars93データの数値データ列について、各列ごとに平均を算出する `mean()` 関数を適用します。
-
-```{r code27, exercise=TRUE, exercise.setup="code00", message=FALSE, warning=FALSE}
-# データの読み込み
-data(Cars93)
-
-# 数値列にmean() 関数を適用
-Cars93 %>% select_if(is.numeric) %>% map(mean)
-
-# 数値列にmean() 関数を適用し、返り値をベクトルで受け取る
-Cars93 %>% select_if(is.numeric) %>% map_dbl(mean)
-```
-
-なお、最近のtidyverseにおいては、データフレームに対する `map_*()` 系処理は、purrrlyrパッケージに機能が移管されているようです。`dmap(関数)` 関数で各列に引数として指定した関数を適用し、結果をデータフレームとして返します。
-
-----
-
-## 1.12.7　lubridate
-
-lubridateは、時間に関するデータを効率的に扱うためのパッケージです。さまざまなフォーマットで記述された年月日、日時を処理できます。
-
-Rでは標準で、Date型、POSIXct型、POSIXlt型など日時データのためのデータ型が提供されています (詳細は後述) が、lubridateパッケージの各関数は、文字列として与えられた年月日、日時などのデータを、簡便な記述でこれらの型に変換します。なお、lubridateパッケージはtidyverseの一部ですが、`library(tidyverse)` とした際には読み込まれないため、個別に読み込む必要があります。
-
-### `ymd()` 関数
-
-`ymd()` 関数は、"2019-08-04" というようなフォーマットで文字列として与えられた年月日データを、Date型またはPOSIXct型に変換します。なお、`tz = "タイムゾーン"` オプションでタイムゾーンを指定しない場合、UTC (日本時間との差マイナス9時間) が選択されます。日本のタイムゾーンは "Asia/Tokyo" と指定します。
-
-```{r code28, exercise=TRUE, message=FALSE, warning=FALSE}
-# パッケージの読み込み
-library(lubridate)
-
-date_char <- "2019-08-04"
-
-# 文字列をDate型に変換
-date_posixct <- ymd(date_char)
-date_posixct
-class(date_posixct)
-
-# tzオプションでタイムゾーンを
-# 指定するとPOSIXct型に変換される
-date_posixct <- ymd(date_char, tz = "Asia/Tokyo")
-date_posixct
-class(date_posixct)
-
-# フォーマットが異なっても処理できる
-date_char <- "2019/08/04"
-
-# 文字列をDate型に変換
-date_posixct <- ymd(date_char, tz = "Asia/Tokyo")
-date_posixct
-class(date_posixct)
-```
-
-### `ymd_hms()` 関数
-
-`ymd_hms()` 関数は、"2019-08-04 23:19:00" というようなフォーマットで文字列として与えられた年月日データを、POSIXct型に変換します。
-
-```{r code29, exercise=TRUE, message=FALSE, warning=FALSE}
-# パッケージの読み込み
-library(lubridate)
-
-date_char <- "2019-08-04 23:19:35"
-
-# 文字列をPOSIXct型に変換
-date_posixct <- ymd_hms(date_char, tz = "Asia/Tokyo")
-date_posixct
-class(date_posixct)
-```
-
-他に、秒が含まれないデータを変換する `ymd_hm()` 関数や、日時の順番が異なる場合の `dmy_hms()` 関数などがあります。
-
-### `year()`, `month()`, `day()` 関数など
-
-POSIXct型として格納されたデータから、年・月・日を個別に抽出できる関数が提供されています。返り値は文字列ベクトルです。
-
-```{r code30, exercise=TRUE, message=FALSE, warning=FALSE}
-# パッケージの読み込み
-library(lubridate)
-
-date_char <- "2019-08-04 23:19:35"
-
-# 文字列をPOSIXct型に変換
-date_posixct <- ymd_hms(date_char, tz = "Asia/Tokyo")
-
-# 年だけを抽出
-year(date_posixct)
-
-# 月だけを抽出
-month(date_posixct)
-
-# 曜日だけを抽出
-wday(date_posixct)
-```
-
-----
-
-## 1.12.8　readxl
-
-readxlは、Microsoft Excelのファイル形式 (`.xlsx`, `.xls`) を扱うためのパッケージです。Rは標準ではExcelファイルを直接扱えませんが、readxlパッケージを使うことで、Excelファイルの任意のシートからデータを読み込むことができます。
-
-readxlパッケージはtidyverseの一部ですが、`library(tidyverse)` とした際には読み込まれないため、個別に読み込む必要があります。
-
-### `excel_sheets()` 関数
-
-引数にファイル名を指定すると、ファイルに含まれるシートの名前をベクトルで返します。
-
-```{r code31, exercise=TRUE, message=FALSE, warning=FALSE}
-library(readxl)
-
-# ファイルのダウンロード
-download.file("https://raw.githubusercontent.com/ltl-manabi/R/master/R_for_beginner/01_demo/data/excel_example.xlsx", destfile = "excel_example.xlsx")
-
-# ファイル中のシート一覧を表示
-excel_sheets("excel_example.xlsx")
-```
-
-### `read_excel()` 関数
-
-実際にファイルの内容を読み込むには、`read_excel()` 関数を使います。
-
-```{r code32, exercise=TRUE, message=FALSE, warning=FALSE}
-library(readxl)
-
-# ファイルのダウンロード
-download.file("https://raw.githubusercontent.com/ltl-manabi/R/master/R_for_beginner/01_demo/data/excel_example.xlsx", destfile = "excel_example.xlsx")
-
-# ファイル中の最初のシートを読み込む
-df_all <- read_excel("excel_example.xlsx")
-str(df_all)
-
-# ファイル中のシートを指定して読み込む
-df_e2019 <- read_excel("excel_example.xlsx", sheet = "電力需要データ_2019")
-str(df_e2019)
-
-# ファイル中のシート・範囲を指定して読み込む
-df_sake <- read_excel("excel_example.xlsx", sheet = "疑似日本酒データ", range = cell_cols("A:C"))
-str(df_sake)
+import numpy as np
+np.sqrt(a)
 ```
