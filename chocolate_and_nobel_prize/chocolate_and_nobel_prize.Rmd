@@ -1,0 +1,257 @@
+---
+title: "チョコレートの消費量とノーベル賞受賞者の関係"
+date: "`r format(Sys.time(),'%Y-%m-%d')`"
+author:
+- "タナカケンタ"
+- "(https://mana.bi/)"
+output:
+  html_notebook:
+    toc: true
+    theme: spacelab
+    code_folding: show
+---
+
+```{r setup, include = FALSE}
+library(knitr)
+
+library(lubridate)
+library(scales)
+library(tidyverse)
+options(dplyr.width = Inf)
+```
+
+## ネタ元
+
+[Chocolate and the Nobel Prize – a true story? » G-Forge](http://gforge.se/2012/12/chocolate-and-nobel-prize/)のコードを、ほぼそのまま借用しています。
+
+
+## ノーベル賞受賞者データの取得
+
+元記事のXMLパッケージ + `readHTMLTable()` 関数では動かなかったので、rvestパッケージを使ったコードに直しました。また、テーブルの列名などが少し変更されていたので対応しました。
+
+```{r eval = TRUE, message = FALSE, warning = FALSE}
+library(rvest) # 元記事のXML + readHTMLでは動かなかったので
+theurl <- "https://en.wikipedia.org/wiki/List_of_countries_by_Nobel_laureates_per_capita"
+tables <- read_html(theurl) %>% html_nodes("table") %>%
+  .[1] %>% html_table(trim = T)
+
+nobel_prizes <- tables[[1]]
+
+# Clean column names
+colnames(nobel_prizes) <- 
+  gsub(" ", "_", 
+       gsub("(/|\\[[0-9]+\\])", "", 
+            gsub("\n", " ", colnames(nobel_prizes))
+        )
+    )
+
+# Delete those that aren't countries and thus lack rank
+nobel_prizes$Rank <- as.numeric(as.character(nobel_prizes$Rank))
+nobel_prizes <- subset(nobel_prizes, is.na(Rank) == FALSE)
+
+# Clean the country names
+nobel_prizes$Entity <- 
+  gsub("[^a-zA-Z ]", "", nobel_prizes$Entity)
+
+# Clean the loriates variable
+nobel_prizes$Laureates10_million <- 
+  as.numeric(as.character(nobel_prizes$Laureates10_million))
+```
+
+## スイスのチョコレート消費量データの入力
+
+スクレイピング先にデータがないため、手入力する必要があるようです。ここも、列名 (Country → Entity) の変更があります。
+
+```{r eval = TRUE, message = FALSE, warning = FALSE}
+nobel_prizes$Chocolate_consumption <- NA
+# http://www.chocosuisse.ch/web/chocosuisse/en/documentation/faq.html
+nobel_prizes$Chocolate_consumption[nobel_prizes$Entity == "Switzerland"] <- 11.9
+```
+
+## ドイツ語による国名表記の英語への変換
+
+スクレイピング先のサイトがドイツ語で書かれているためです。rvestを用いた記述に書き換えました。
+
+```{r eval = TRUE, message = FALSE, warning = FALSE}
+# Translation from German to English
+theurl <- "https://www.thoughtco.com/countries-of-the-world-index-4101906"
+
+tables <- read_html(theurl) %>% html_nodes("table") %>%
+  .[1] %>% html_table(trim = T)
+
+translate_german <- tables[[1]]
+translate_german <- translate_german[3:nrow(translate_german), 1:2]
+colnames(translate_german) <- c("English", "German")
+translate_german$German <- 
+    gsub("([ ]+(f|pl)\\.$|\\([[:alnum:] -]+\\))", "", translate_german$German)
+```
+
+## 国別チョコレート消費量データの取得
+
+ドイツのチョコレートメーカー? のサイトに記載されている、国別のチョコレート消費量を取得します。rvestを用いた記述に書き換えました。また、ノーベル賞受賞者数のテーブルではCountryではなく、Entity (地域?) になっているため、最後のSQL文を書き換えました。
+
+```{r eval = TRUE, message = FALSE, warning = FALSE}
+# Get the consumption from a German list
+theurl <- "http://www.theobroma-cacao.de/wissen/wirtschaft/international/konsum"
+
+tables <- read_html(theurl) %>% html_nodes("table") %>%
+  .[1] %>% html_table(trim = T)
+
+german_chocolate_data <- tables[[1]][2:nrow(tables[[1]]), ]
+names(german_chocolate_data) <- c("Country", "Chocolate_consumption")
+german_chocolate_data$Country <- 
+    gsub("([ ]+f\\.$|\\([[:alnum:] -]+\\))", "", german_chocolate_data$Country)
+
+library(sqldf)
+
+sql <- paste0("SELECT gc.*, tg.English as Country_en",
+              " FROM german_chocolate_data AS gc", 
+              " LEFT JOIN translate_german AS tg", 
+              " ON gc.Country = tg.German",
+              " OR gc.Country = tg.English")
+german_chocolate_data <- sqldf(sql)
+
+german_chocolate_data$Country <- 
+    ifelse(is.na(german_chocolate_data$Country_en), 
+    german_chocolate_data$Country, 
+    german_chocolate_data$Country_en)
+    
+german_chocolate_data$Country_en <- NULL
+german_chocolate_data$Chocolate_consumption_tr <- NA
+for (i in 1:nrow(german_chocolate_data)) {
+    number <- as.character(german_chocolate_data$Chocolate_consumption[i])
+    if (length(number) > 0) {
+        m <- regexpr("^([0-9]+,[0-9]+)", number)
+        if (m > 0) {
+            german_chocolate_data$Chocolate_consumption_tr[i] <- 
+                as.numeric(
+                    sub(",", ".", regmatches(number, m))
+                )
+        } else {
+            m <- regexpr("\\(([0-9]+,[0-9]+)", number)
+
+            if (m > 0) 
+                german_chocolate_data$Chocolate_consumption_tr[i] <- 
+                    as.numeric(
+                        sub("\\(", "", 
+                            sub(",", ".", regmatches(number, m))
+                        )
+                    )
+        }
+    }
+}
+
+sql <- paste0("SELECT np.*, gp.Chocolate_consumption_tr AS choc",
+              " FROM nobel_prizes AS np", 
+              " LEFT JOIN german_chocolate_data AS gp", 
+              " ON gp.Country = np.Entity")
+nobel_prizes <- sqldf(sql)
+```
+
+## 関係性をグラフで描画
+
+一部、列名が現在取得できるテーブルのものと異なっていたので修正しました。
+
+```{r eval = TRUE, message = FALSE, warning = FALSE}
+library(ggplot2)
+ggplot(data = subset(nobel_prizes, is.na(choc) == FALSE), aes(x = choc, y = Laureates10_million)) + 
+    ylab("1千万人あたりのノーベル賞受賞者数") + xlab("1人あたりのチョコレート消費量 (kg)") + 
+    geom_point(size = 4, colour = "#444499") + geom_text(aes(label = Entity), 
+    size = 5, position = position_jitter(width = 0.5, height = 0.5), colour = "#990000")
+```
+
+```
+　　　　　 /|
+ﾍ　/|/ |　　　N /i/´ ﾞ￣￣｀`ヾ)＿　　　　　　∧　　/
+　V 　 .|　,　 Nヾ　ﾞ　　　　　　　　ﾞヽ　　　|＼/　∨l/
+　　　　ﾚ'　7Nﾞ､　　　　　　　　　　　 ﾞi　_|｀
+　　　　　 /Nﾞゞ　　　　　　　　　　　　.! ヽ　　　チ
+　関　　　 7ゞミﾐ､　　ノ,彡ｲﾊヾ、　　i　Z　　　ョ
+　 係　　　Zー-r-==､'リノ_ﾉ_,.ヾミ,.ｨ,ﾆi　ヽ　　 コ
+　あ　　　/　　{i　｀ﾞ';l={ﾞ´石ゞ}='´ﾞ'r_/　〈　　　 と
+　っ　　　|:　　 ｀iー'/　ヾ､__,.ﾉ　 /i´　　/　　　ノ
+　た　　　i､ 　　　!　 ﾞﾆ-=､　 u / ,ト,　∠_　　｜
+　よ　　　|｀　　　 ヽ、i'､_丿　／／/ ヽ　/_　ベ
+！！　　 |　　＿,.ｨﾍヽ二 ｨ'_／　/　　ﾞi＼|／Wlﾍ　ル
+　　　　　 |'￣／　i　ヽ_.／´ 　 ./　 　 .|　｀＼　賞　 ∨＼
+wﾍ　 /＼|／　　/ィ´￣ﾞi　　　/　　　ir＝､　 l'i"ヽ､　は
+　　∨　∠__,,..-ｲ　i　　 /＼_,ｲ,=-、　i ､,.ゞ､ | ﾞ'"ヽ ＼
+! 　 　 .i-'´　　,i | ./｀ﾞ'i'　　 /i_.!._,..ヽ＜!　　ﾞi､ﾞi.　 =ﾞ!　 ＼
+!　　　 |　　　.,iﾞ::|/　　.|　 ,/::/-i　　 ﾞi　ﾞi　三ﾞi ﾞi　　 | /⌒
+i/　　 .|　　　,iﾞ:::i'　 　 | ,/ ::/= .|三.　ﾞi/.|　　 .| .|　　.ij:.
+.l〉　　 |　　 ,iﾞ :::|　　　.!' ::::iﾞ'i　　ﾄ.　　ﾞi　|　_,.. V　＝,!
+　!　　 |　　,iﾞ ::::|　　 / ::::::|　l=　ヾ!.._　ヽ｣　"´;i　　:.:i　./
+. |　　 .|　 .,i ::::::|　 ,/::::::::::|　 ヾ:.:.　ヾ::"　ﾞ　　　　　/／
+│　　 |　 ,i::::::::| ,/ .::::::::: |　　　ﾞi.:.:.:.:.:､:.:.:.:.:.:.:.:.:.:／,ｨ'"´
+.| 　 　 |　 i::::::::,ｲ::::::::::::::::|　　　/ﾄ､;:;:;:;:;:;:;:;:;:;::,ノi|Y
+```
+
+```
+　　　　　　　　　ナ ゝ　　　ナ ゝ　/　 　 十＿"　 　 ー;=‐　　　　　　　　　|! |!
+　　　　　　　　　　cト　　　　cト　/＾､_ﾉ　 | ､.__　つ　 （.__ 　 ￣￣￣￣ 　 ・ ・
+ミﾐ:::;,!　　　　　　u　　　　　　　｀ﾞ"~´　　　ヾ彡::l／VvVw、 ,yvヾNヽ　　ゞヾ　 ,.　,.　,.　、､ヾゝヽr＝ヾ
+ﾐ::::;/　　￣ﾞ`ｰ-.､　　　　　u　　;,,;　　　j　　 ヾk'!　' l　/ 'ﾚ ^ヽﾍ＼　　 ,rﾞゞﾞ-"､ノ /　l!　!ヽ ､､　|
+ミ/　　　　J　　　ﾞ`ｰ､　　　"　;, ;;;　,;;　ﾞ　　u ヾi　　　 ,,./　,　,､ヾヾ　　 | '-- ､..,,ヽ　 j　 !　| Nヾ|
+'"　　　　　　　_,,.. -─ゝ.､　　　;, "　;;　　　_,,..._ゞｲ__／/〃 i.! ilヾゞヽ　 | ､　 .r．　ヾ-､;;ﾉ,.:-一'"i
+　　j　　　　／　　 ,.- ､　 ヾヽ、　;; ;;　_,-＜　　/／_,,＼' "' !|　:l ﾞi !_,,ヽ.l　`ー─--　 ｴｨ' (． 7 /
+　　　　　　:　　　　' ・丿　　￣≠Ξｲ´,-､　ヽ /ｲ´ r．　`ー-'ﾒ ,.-´､　　i　　　　 u　　ヾ｀`ー' ｲ
+　　　　　　 ＼_　　　 _,,......::　　　´ﾞi､　`¨　/　i　ヽ.__,,... '　 u ﾞl´.i･j.冫,ｲﾞl　 ／ ｀`-､..-　ノ　:u l
+　　　u　　　　　￣￣　　彡"　　　、ヾ￣｀`ﾐ::.l　　u　　　j　　i､｀ー'　.i /　/､._　　　　｀'y　　 /
+　　　　　　　　　　　　　　u　　　　　　｀ヽ　　ﾞ:l　　 ,.::- ､,,　,.　ノ　ﾞ u　!　/_　　￣　ー/　u　/
+　　　　　　　　　　　_,,..,,_　　　　,.ｨ､　 ／　　　|　 /__　　 ｀`- ､_　　　 l　l　 ｀`ｰt､_　/　　／
+　　ﾞ　　　u　　,.／´　"　 ｀`- ､_Ｊ　r'´　 u　丿　.l,...　｀ー一''/　　　ノ　 ﾄ ､,,_____　ﾞ/　／
+　　　　　　　 ./＿_　　　　　　　　ｰ７　　　　/、　l　　 'ﾞ　ヽ/　 ,. '"　　＼｀ｰ--- ",.::く､
+　　　　　　　/;;;''"　￣￣ ───/　　ﾞ　 ,::'　 ＼ヾﾆ==＝'"／ ｀- ､　　　ﾞー┬ '´　/　＼..,,__
+、　　　　　 .i:⌒`─-､_,....　　　　l　　　／　　　　 ｀ー┬一'　　　　　 ヽ　　　 :l　 ／　 , '　｀ソヽ
+ヾヽ　　　　 l　　　　　 `　 ｀ヽ、 l　 .／　　ヽ　　　　　 l　　　　　　　　　）　　,; ／　　　,'　　　　'^i
+```
+
+AAって難しいね (›´ω`‹ ) ｹﾞｯｿﾘ
+
+## BMIデータを追加
+
+ついでに、BMI (Body mass index) の国別データも取得し、追加してみたそうです。OECDのライブラリから、2012年の調査データを取得するようですが、URLが変更されていたので、修正しました。
+
+```{r eval = TRUE, message = FALSE, warning = FALSE}
+# Percentage of males with a BMI > 25 kg/m2
+tables <- read_html("https://www.oecd-ilibrary.org/sites/ovob-ml-table-2012-2-en/index.html?itemId=/content/component/ovob-ml-table-2012-2-en") %>% html_nodes("table") %>% .[1] %>% html_table(trim = T)
+
+ob <- tables[[1]]
+ob[, 2] <- as.character(ob[, 2])
+ob <- apply(ob, FUN = as.character, MARGIN = 2)
+ob <- ob[, 2:ncol(ob)]
+ob <- ob[4:nrow(ob), ]
+
+last_obesitas <- apply(apply(ob[, 2:ncol(ob)], FUN = as.numeric, MARGIN = 2), 
+    MARGIN = 1, FUN = function(x) {
+        if (any(is.na(x) == FALSE)) 
+            return(x[max(which(is.na(x) == FALSE))]) else return(NA)
+    })
+
+ob <- data.frame(Country = ob[, 1], last_obesitas = last_obesitas)
+ob <- subset(ob, is.na(last_obesitas) == FALSE)
+
+sql <- paste0("SELECT np.*, ob.last_obesitas AS obesitas",
+              " FROM nobel_prizes AS np", 
+              " LEFT JOIN ob", " ON ob.Country = np.Entity")
+nobel_prizes <- sqldf(sql)
+```
+
+## チョコレートの消費量とノーベル賞受賞者数、BMIの関係をグラフで描画
+
+```{r eval = TRUE, message = FALSE, warning = FALSE}
+ggplot(data = subset(nobel_prizes, is.na(choc) == FALSE), aes(x = choc, y = Laureates10_million)) + 
+    ylab("1千万人あたりのノーベル賞受賞者数") + xlab("1人あたりのチョコレート消費量 (kg)") + 
+    geom_point(aes(size = obesitas), colour = "#444499") + scale_size(range = c(2, 
+    10)) + geom_text(aes(label = Entity), size = 5, position = position_jitter(width = 0.5, 
+    height = 0.5), colour = "#770000")
+```
+
+## チョコレート消費量とノーベル賞受賞者数の線形回帰モデル
+
+目的変数を受賞者数 (の割合)、説明変数をチョコレートの消費量としているので、「ノーベル賞の受賞者数は、チョコレートの消費量によって説明できる」と仮定した因果モデルですね。列名が少し異なっているので修正しました。
+
+```{r eval = TRUE, message = FALSE, warning = FALSE}
+fit <- lm(Laureates10_million ~ choc, data = nobel_prizes)
+summary(fit)
+```

@@ -1,0 +1,93 @@
+---
+title: "opentripplannerの使用例"
+author:
+  - タナカケンタ
+  - https://mana.bi
+output: html_notebook
+editor_options: 
+  chunk_output_type: inline
+---
+
+[OpenTripPlanner](https://www.opentripplanner.org/) (OTP) は、オープンソースの経路探索システムです。一般的な乗り換え案内サービスのようにWebインターフェースがあって、出発地、目的地を入力して、というほど簡単には使えないようですが、Javaで開発されており、どのようなコンピュータでも動作させることができます。このNotebookでは、RからOTPにアクセスするための [opentripplannerパッケージ](https://docs.ropensci.org/opentripplanner/)を使って経路探索ができることを確認してみます。
+
+主に、[opentripplanner: Fast and Easy Multimodal Trip Planning in R with OpenTripPlanner](https://ropensci.org/technotes/2020/02/25/opentripplanner/)の記事を参考にしています。また、OpenTripPlannerで日本の交通機関データを読み込み検索する例として、[オープンソースの経路探索「OpenTripPlanner」をUbuntuで動かして岡山県で経路探索をする](https://qiita.com/kumatira/items/658e7b75785c854f0f69)という解説記事があります。
+
+## パッケージのインストール
+
+**opentripplanner** パッケージはCRANに登録されているので、以下のようにインストールします。
+
+```{r eval=FALSE}
+install.packages("opentripplanner")
+```
+
+## パッケージの読み込み
+
+`library()` 関数でパッケージを読み込みます。
+
+```{r}
+library(opentripplanner)
+```
+
+## 初期設定
+
+opentripplannerパッケージでは、(Java製の) OTPそのものをダウンロードし、ローカルで実行するようです。そのため、ダウンロード先などの初期設定を行います。なお、OTPを実行するには、当然ですがJava実行環境 (JRE) が必要です。
+
+```{r}
+path_data <- file.path(tempdir(), "OTP") # OTP のダウンロード先を指定 
+dir.create(path_data)
+path_otp <- otp_dl_jar(path_data)        # OTPのダウンロード
+otp_dl_demo(path_data)                   # デモデータのダウンロード
+log1 <- otp_build_graph(otp = path_otp, 
+                        dir = path_data) # デモデータからグラフ構造を作成
+log2 <- otp_setup(otp = path_otp, 
+                  dir = path_data)       # OTPを起動
+```
+
+## OTPへのアクセス
+
+上記の設定で、裏でOTPが起動しています。OTPのインスタンスにアクセスするには、以下のようにします。
+
+```{r}
+otpcon <- otp_connect()
+```
+
+## 日本の経路データの読み込み
+
+OTPはあくまで経路探索の仕組みを提供するもので、世界中の交通機関のデータは含まれていません。GTFSという標準化されたフォーマットで記述された経路・時刻表データを読み込ませて利用します。ここでは、上述の[オープンソースの経路探索「OpenTripPlanner」をUbuntuで動かして岡山県で経路探索をする](https://qiita.com/kumatira/items/658e7b75785c854f0f69)記事にある、岡山市のデータを読み込んでみます。
+
+```{r}
+
+```
+
+## 出発地、目的地の指定
+
+OTPでは、出発地、目的地を緯度経度で指定するようです。`otp_plan()` 関数で指定します。ここでは、品川駅を出発地、兵庫県の[姫路競馬場](http://www.sonoda-himeji.jp/) (最寄りの姫路駅) を目的地とします。交通手段としては `TRANSIT`, `WALK`, `BICYCLE`, `CAR`, `BUS`, `RAIL` が指定できるようですので、ここでは `TRANSIT`, `RAIL`, `WALK` を指定します。
+
+```{r}
+route <- otp_plan(otpcon,               # Route between two lon/lat coordinates 
+                  fromPlace = c(-1.17502, 50.64590),  
+                  toPlace = c(-1.15339, 50.72266),
+                  mode = c("WALK","TRANSIT")) 
+#route <- otp_plan(otpcon,
+#                  fromPlace = c(139.74044000000004, 35.630152),
+#                  toPlace = c(135.500109, 34.73348),
+#                  mode = c("WALK", "RAIL", "TRANSIT")) 
+```
+
+## 経路の可視化
+
+OTPで得られた経路情報は、[tmpパッケージ](https://github.com/mtennekes/tmap)で可視化できます。tmapパッケージもCRANに登録されているので、以下のようにしてインストールできます。
+
+```{r eval=FALSE}
+install.packages("tmap")
+```
+
+tmapパッケージを使い、可視化してみます。
+
+```{r}
+library(tmap)
+
+tmap_mode("view")                       # インタラクティブな可視化モードを指定
+qtm(sf::st_zm(route), lines.lwd = 3,
+    lines.col = "mode")                 # 地図の描画
+```
