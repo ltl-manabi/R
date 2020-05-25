@@ -5,7 +5,7 @@ author:
 - "タナカケンタ"
 - "(https://mana.bi/)"
 output:
-  html_notebook:
+  html_document:
     toc: true
     theme: spacelab
     code_folding: show
@@ -148,6 +148,13 @@ sql <- paste0("SELECT np.*, gp.Chocolate_consumption_tr AS choc",
 nobel_prizes <- sqldf(sql)
 ```
 
+## 相関係数を算出
+
+```{r eval = TRUE, message = FALSE, warning = FALSE}
+res_cor <- nobel_prizes %>% filter(!is.na(choc)) %>% select(Laureates10_million, choc) %>% cor()
+res_cor
+```
+
 ## 関係性をグラフで描画
 
 一部、列名が現在取得できるテーブルのものと異なっていたので修正しました。
@@ -157,7 +164,7 @@ library(ggplot2)
 ggplot(data = subset(nobel_prizes, is.na(choc) == FALSE), aes(x = choc, y = Laureates10_million)) + 
     ylab("1千万人あたりのノーベル賞受賞者数") + xlab("1人あたりのチョコレート消費量 (kg)") + 
     geom_point(size = 4, colour = "#444499") + geom_text(aes(label = Entity), 
-    size = 5, position = position_jitter(width = 0.5, height = 0.5), colour = "#990000")
+    size = 5, position = position_jitter(width = 0.5, height = 0.5), colour = "#990000") + annotate("text", x = 1.8, y = 25, label=paste("相関係数:", round(res_cor[1, 2], 2)), size = 6)
 ```
 
 ```

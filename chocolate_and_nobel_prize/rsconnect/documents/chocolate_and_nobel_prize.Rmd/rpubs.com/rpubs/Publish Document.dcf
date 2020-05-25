@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/619353/3a034c67a7f64a4c9f691f9fb1bfe4a0
+bundleId: https://api.rpubs.com/api/v1/document/619353/3a034c67a7f64a4c9f691f9fb1bfe4a0
+url: http://rpubs.com/ktanaka/619353/edit
+when: 1590410693.46569

@@ -1,0 +1,13 @@
+name: learnr_demo
+title: learnr_demo
+username:
+account: ltlmanabi
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2352549
+bundleId: 3186930
+url: https://ltlmanabi.shinyapps.io/learnr_demo/
+when: 1590399811.8623
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: learnr-folder-for-debug
