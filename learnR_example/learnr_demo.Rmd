@@ -106,6 +106,12 @@ question("tidyverseパッケージの中心的な開発者は誰でしょう？"
          )
 ```
 
+## Include video instruction
+
+以下のように、YouTubeまたはVimeoサービスの動画を貼り付けることが可能です。
+
+![](https://www.youtube.com/watch?v=QKKv40-hVoA){width="70%"}
+
 ## Making exercise with other language
 
 [learnrパッケージのissue](https://github.com/rstudio/learnr/pull/310)で議論されていた、R以外の言語 (Python, SQLなど) への対応が実装されたようなので、試してみます。もちろん、他の言語を実行するためにはその言語の実行環境が必要です。ここでは、Pythonの例を作成します。
