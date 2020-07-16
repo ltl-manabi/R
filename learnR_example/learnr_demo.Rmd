@@ -116,13 +116,10 @@ question("tidyverseパッケージの中心的な開発者は誰でしょう？"
 
 [learnrパッケージのissue](https://github.com/rstudio/learnr/pull/310)で議論されていた、R以外の言語 (Python, SQLなど) への対応が実装されたようなので、試してみます。もちろん、他の言語を実行するためにはその言語の実行環境が必要です。ここでは、Pythonの例を作成します。
 
-なお、2020年1月12日現在、この機能はGitHubのmasterブランチにはマージされていないため、以下のように対応するブランチをクローンし、手元でパッケージをコンパイルしてインストールする必要があります。
-```
-$ git clone -b exercise_language https://github.com/rstudio/learnr.git
-$ R CMD build learnr
-$ R
-...
-install.packages("learnr_0.10.0.9000.tar.gz")
+2020年7月に、この機能がGitHubのmasterブランチにはマージされました。CRANにはまだリリースされていないため、以下のようにGitHubリポジトリからインストールする必要があります。
+
+```{r inst_learnr, eval=FALSE, echo=TRUE}
+remotes::install_github("rstudio/learnr")
 ```
 
 下記のPythonコードを実行するチャンクを作成し、exerciseとして機能するか確認します。
@@ -132,7 +129,16 @@ a = [3, 3, 4]
 a
 
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 np.sqrt(a)
+
+dic = {'game': [1, 2, 3, 4], 'L': [10, 10, 10, 3], 'H': [1, 0, 1, 2]}
+df = pd.DataFrame(dic)
+df
+
+df.iloc[:, 1:3].plot(kind='bar')
+plt.show()
 ```</code></pre>
 
 ```{python python01, exercise=TRUE}
@@ -140,5 +146,14 @@ a = [3, 3, 4]
 a
 
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 np.sqrt(a)
+
+dic = {'game': [1, 2, 3, 4], 'L': [10, 10, 10, 3], 'H': [1, 0, 1, 2]}
+df = pd.DataFrame(dic)
+df
+
+df.iloc[:, 1:3].plot(kind='bar')
+plt.show()
 ```
