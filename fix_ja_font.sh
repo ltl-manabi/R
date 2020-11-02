@@ -11,7 +11,7 @@
 
 mkdir ~/tmp
 cd ~/tmp
-curl -O -L https://ipafont.ipa.go.jp/IPAfont/IPAGTTC00303.zip
+curl -O -L http://moji.or.jp/wp-content/ipafont/IPAfont/IPAGTTC00303.zip
 unzip IPAGTTC00303.zip
 mkdir -p ~/.fonts/ipa
 cp ./IPAGTTC00303/*.ttc ~/.fonts/ipa
